@@ -13,40 +13,27 @@ def isfloat(num):
     except ValueError:
         return False
 
-
-# def my_percentile(data, percentile):
-#     new_data = re.findall('[\d.]+', data)
-#     arr = np.array(new_data)
-#     new_list = []
-#     for i in range(len(arr)):
-#         if(isfloat(arr[i])):
-#             x = float(arr[i])
-#             new_list.append(x)
-#     # answer = np.percentile(new_list, percentile)
-#     result = round(np.percentile(new_list, percentile), 2)
-#     print(result)
-
-#     return result
-
-
 @csrf_exempt
 def index(request):
-    json_data = json.loads(request.body)
-    percentile = int(json_data.get('percentile'))
-    if request.method == "POST":
-        values = str(json_data.get('data'))  # string having whole ques
-        new_data = re.findall('[\d.]+', values)
-    arr = np.array(new_data)
-    new_list = []
-    for i in range(len(arr)):
-        if(isfloat(arr[i])):
-            x = float(arr[i])
-            new_list.append(x)
-    # answer = np.percentile(new_list, percentile)
-    result = round(np.percentile(new_list, percentile), 2)
-    print(result)
-    create_table = []
-    for i in range(0, 21):
-        create_table.append(round(np.percentile(new_list, i*5)))
+    try:
+        json_data = json.loads(request.body)
+        percentile = int(json_data.get('percentile'))
+        if request.method == "POST":
+            values = str(json_data.get('data'))
+            filtered_data = re.findall('[\d.]+', values)
+        input_data_array = np.array(filtered_data)
+        processed_data = []
+        for i in range(len(input_data_array)):
+            if(isfloat(input_data_array[i])):
+                x = float(input_data_array[i])
+                processed_data.append(x)
+        # answer = np.percentile(new_list, percentile)
+        result = round(np.percentile(processed_data, percentile), 2)
+        create_table = []
+        for i in range(0, 21):
+            create_table.append(round(np.percentile(processed_data, i*5), 2))
 
-    return JsonResponse({'ans': result, 'table': create_table})
+        return JsonResponse({'ans': result, 'table': create_table})
+    except Exception as e:
+        return JsonResponse({'error_msg': e})    
+
